@@ -1,0 +1,151 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:VF-{incident_type}-{#####}",
+ "creation": "2025-12-01 08:50:38.664540",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_frz6",
+  "incident_title",
+  "date_and_time",
+  "victim",
+  "incident_type",
+  "amended_from",
+  "description",
+  "immediate_causes",
+  "column_break_ouqa",
+  "department",
+  "fetch_geolocation",
+  "location",
+  "latitude",
+  "longitude",
+  "tab_break_tkym",
+  "root_cause",
+  "corrective_actions"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_frz6",
+   "fieldtype": "Section Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Incident Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "incident_title",
+   "fieldtype": "Data",
+   "label": "Incident Title"
+  },
+  {
+   "fieldname": "date_and_time",
+   "fieldtype": "Datetime",
+   "label": "Date and Time"
+  },
+  {
+   "fieldname": "victim",
+   "fieldtype": "Data",
+   "label": "Victim"
+  },
+  {
+   "fieldname": "column_break_ouqa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "fetch_geolocation",
+   "fieldtype": "Button",
+   "label": "Fetch Geolocation"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Geolocation",
+   "label": "Location"
+  },
+  {
+   "fieldname": "incident_type",
+   "fieldtype": "Select",
+   "label": "Incident Type",
+   "options": "\nNear Miss (NM)\nFirst Aid Case (FAC)\nLost Time Injury (LTI)\nFatality\nOthers"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "immediate_causes",
+   "fieldtype": "Data",
+   "label": "Immediate Causes"
+  },
+  {
+   "fieldname": "tab_break_tkym",
+   "fieldtype": "Tab Break",
+   "label": "Findings"
+  },
+  {
+   "fieldname": "root_cause",
+   "fieldtype": "Small Text",
+   "label": "Root Cause"
+  },
+  {
+   "fieldname": "corrective_actions",
+   "fieldtype": "Table",
+   "label": "Corrective Actions",
+   "options": "Incident Corrective Actions"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-01 09:18:18.695361",
+ "modified_by": "Administrator",
+ "module": "Victory Group ERPNext Custom App",
+ "name": "Incident Report",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
