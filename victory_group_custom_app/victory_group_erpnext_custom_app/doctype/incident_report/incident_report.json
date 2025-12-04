@@ -9,17 +9,24 @@
   "section_break_frz6",
   "incident_title",
   "date_and_time",
-  "victim",
+  "reported_by",
+  "ppe_status",
   "incident_type",
-  "amended_from",
   "description",
   "immediate_causes",
   "column_break_ouqa",
+  "role_type",
+  "victim",
   "department",
-  "fetch_geolocation",
+  "victim_employee",
+  "victim_employee_department",
+  "victim_presence_status",
   "location",
+  "fetch_geolocation",
+  "geolocation",
   "latitude",
   "longitude",
+  "amended_from",
   "tab_break_tkym",
   "root_cause",
   "corrective_actions"
@@ -43,53 +50,60 @@
   {
    "fieldname": "incident_title",
    "fieldtype": "Data",
-   "label": "Incident Title"
+   "in_list_view": 1,
+   "label": "Incident Title",
+   "reqd": 1
   },
   {
    "fieldname": "date_and_time",
    "fieldtype": "Datetime",
-   "label": "Date and Time"
+   "in_list_view": 1,
+   "label": "Date and Time",
+   "reqd": 1
   },
   {
+   "depends_on": "eval: doc.role_type != 'Employee (FTE)'",
    "fieldname": "victim",
    "fieldtype": "Data",
-   "label": "Victim"
+   "label": "Victim",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_ouqa",
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval: doc.role_type == 'Casual'",
    "fieldname": "department",
    "fieldtype": "Link",
-   "label": "Department",
+   "label": "Victim Department",
+   "mandatory_depends_on": "eval: doc.role_type == 'Casual'",
    "options": "Department"
   },
   {
+   "depends_on": "eval: doc.location == 'Other'",
    "fieldname": "fetch_geolocation",
    "fieldtype": "Button",
    "label": "Fetch Geolocation"
   },
   {
-   "fieldname": "location",
-   "fieldtype": "Geolocation",
-   "label": "Location"
-  },
-  {
    "fieldname": "incident_type",
    "fieldtype": "Select",
    "label": "Incident Type",
-   "options": "\nNear Miss (NM)\nFirst Aid Case (FAC)\nLost Time Injury (LTI)\nFatality\nOthers"
+   "options": "\nNear Miss (NM)\nFirst Aid Case (FAC)\nLost Time Injury (LTI)\nFatality\nOthers",
+   "reqd": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description"
+   "label": "Description",
+   "reqd": 1
   },
   {
    "fieldname": "immediate_causes",
    "fieldtype": "Data",
-   "label": "Immediate Causes"
+   "label": "Immediate Causes",
+   "reqd": 1
   },
   {
    "fieldname": "tab_break_tkym",
@@ -108,21 +122,85 @@
    "options": "Incident Corrective Actions"
   },
   {
+   "depends_on": "eval: doc.location == 'Other'",
    "fieldname": "latitude",
    "fieldtype": "Float",
-   "label": "Latitude"
+   "label": "Latitude",
+   "mandatory_depends_on": "eval: doc.location == 'Other'"
   },
   {
+   "depends_on": "eval: doc.location == 'Other'",
    "fieldname": "longitude",
    "fieldtype": "Float",
-   "label": "Longitude"
+   "label": "Longitude",
+   "mandatory_depends_on": "eval: doc.location == 'Other'"
+  },
+  {
+   "fieldname": "reported_by",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reported By",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ppe_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "PPE Status",
+   "options": "\nPPE required - not worn at all\nPPE required - not worn fully / properly\nPPE required - worn completely and properly\nNo PPE required",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.location == 'Other'",
+   "fieldname": "geolocation",
+   "fieldtype": "Geolocation",
+   "label": "Location",
+   "mandatory_depends_on": "eval: doc.location == 'Other'"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location",
+   "reqd": 1
+  },
+  {
+   "fieldname": "role_type",
+   "fieldtype": "Select",
+   "label": "Role Type",
+   "options": "\nEmployee (FTE)\nCasual\nContractor\nSupplier\nVisitor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "victim_presence_status",
+   "fieldtype": "Select",
+   "label": "Victim Presence Status",
+   "options": "\nAt Work\nIn Transit home-work\nVisiting",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
+   "fieldname": "victim_employee",
+   "fieldtype": "Link",
+   "label": "Victim (Employee)",
+   "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
+   "fetch_from": "victim_employee.department",
+   "fieldname": "victim_employee_department",
+   "fieldtype": "Link",
+   "label": "Victim Employee Department ",
+   "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
+   "options": "Department"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-01 09:18:18.695361",
+ "modified": "2025-12-04 11:56:35.624307",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
