@@ -12,6 +12,8 @@
   "reported_by",
   "ppe_status",
   "incident_type",
+  "incident_type_subcategory",
+  "severity",
   "description",
   "immediate_causes",
   "column_break_ouqa",
@@ -194,13 +196,28 @@
    "label": "Victim Employee Department ",
    "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "options": "Department"
+  },
+  {
+   "depends_on": "eval: doc.incident_type == 'Others'",
+   "fieldname": "incident_type_subcategory",
+   "fieldtype": "Select",
+   "label": "Incident Type Subcategory",
+   "mandatory_depends_on": "eval: doc.incident_type == 'Others'",
+   "options": "\nAsset damage\nEnvironmental damage\nThird-party individual"
+  },
+  {
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "label": "Severity",
+   "options": "\nLow\nModerate\nHigh\nCatastrophic\nLow Catastrophic",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 11:56:35.624307",
+ "modified": "2025-12-08 11:50:16.513757",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",

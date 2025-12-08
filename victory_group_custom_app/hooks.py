@@ -137,13 +137,12 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Incident Report": {
+		"on_submit": "victory_group_custom_app.victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_on_submit"
+	}
+}
+
 
 # Scheduled Tasks
 # ---------------
