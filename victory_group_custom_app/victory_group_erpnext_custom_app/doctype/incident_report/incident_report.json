@@ -110,17 +110,20 @@
   {
    "fieldname": "tab_break_tkym",
    "fieldtype": "Tab Break",
-   "label": "Findings"
+   "label": "Findings",
+   "read_only_depends_on": "eval: doc.workflow_state != 'Pending Full Submission'"
   },
   {
    "fieldname": "root_cause",
    "fieldtype": "Small Text",
-   "label": "Root Cause"
+   "label": "Root Cause",
+   "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'"
   },
   {
    "fieldname": "corrective_actions",
    "fieldtype": "Table",
    "label": "Corrective Actions",
+   "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
    "options": "Incident Corrective Actions"
   },
   {
@@ -217,7 +220,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 11:50:16.513757",
+ "modified": "2025-12-09 10:23:38.407377",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",

@@ -7,26 +7,34 @@ from frappe.model.document import Document
 from hrms.hr.utils import set_geolocation_from_coordinates
 from frappe import _
 from frappe.email.doctype.notification.notification import get_context
-from frappe.utils.html import scrub_html
+from frappe.utils import now_datetime, sanitize_html
+from frappe.utils.data import get_datetime
+
 
 class IncidentReport(Document):
-	def validate(self):
-		self.set_geolocation()
-		
-		if self.date_and_time and self.date_and_time > today():
-				frappe.throw("Date cannot be in the future.")
-		
-	@frappe.whitelist()
-	def set_geolocation(self):
-		set_geolocation_from_coordinates(self)
-	 
-	# before save ensure attachments are added to the document
-	def on_submit(doc):
-		# Check if there are any attachments linked to the document
-		attachments = frappe.get_all('File', filters={'attached_to_doctype': doc.doctype, 'attached_to_name': doc.name})
-		
-		if not attachments:
-			frappe.throw(_("Please Attach Reference Document(s)."))
+    def validate(self):
+        self.set_geolocation()
+
+        # ensure date_and_time (string or datetime) is not in the future
+        if self.date_and_time:
+            dt = get_datetime(self.date_and_time)
+            if dt and dt > now_datetime():
+                frappe.throw(_("Date cannot be in the future."))
+
+    @frappe.whitelist()
+    def set_geolocation(self):
+        set_geolocation_from_coordinates(self)
+
+    # before submit ensure attachments are added to the document
+    def on_submit(self):
+        # Check if there are any attachments linked to the document
+        attachments = frappe.get_all(
+            'File', filters={'attached_to_doctype': self.doctype, 'attached_to_name': self.name}
+        )
+
+        if not attachments:
+            frappe.throw(_("Please Attach Reference Document(s)."))
+   
 def _user_emails_from_role(role):
     users = frappe.get_all("Has Role", filters={"role": role}, fields=["parent"])
     emails = set()
@@ -151,7 +159,7 @@ def notify_on_submit(doc, method=None):
             "doctype": "Communication",
             "communication_type": "Communication",
             "subject": subject,
-            "content": scrub_html(message),
+            "content": sanitize_html(message),
             "sender": frappe.session.user,
             "recipients": ", ".join(recipients),
             "reference_doctype": doc.doctype,

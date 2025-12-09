@@ -14,7 +14,6 @@ function update_severity_options(frm) {
 
 	if (restricted_types.includes(frm.doc.incident_type)) {
 		frm.set_df_property('severity', 'options', restricted_options);
-		// If current value is not allowed, clear it so user picks a valid one
 		const allowed = ['Moderate', 'High', 'Catastrophic'];
 		if (frm.doc.severity && !allowed.includes(frm.doc.severity)) {
 			frm.set_value('severity', null);
@@ -27,8 +26,28 @@ function update_severity_options(frm) {
 frappe.ui.form.on("Incident Report", {
 	refresh: function(frm) {
 		update_severity_options(frm);
+		// On load, if incident_type exists and severity is blank, set default
+		const mapping = {
+			"First Aid Case (FAC)": "Moderate",
+			"Lost Time Injury (LTI)": "High",
+			"Fatality": "Catastrophic",
+		};
+		const sev = mapping[frm.doc.incident_type];
+		if (sev && !frm.doc.severity) {
+			frm.set_value('severity', sev);
+		}
 	},
 	incident_type: function(frm) {
 		update_severity_options(frm);
+		// Always set mapped severity on type change (overwrite existing)
+		const mapping = {
+			"First Aid Case (FAC)": "Moderate",
+			"Lost Time Injury (LTI)": "High",
+			"Fatality": "Catastrophic",
+		};
+		const sev = mapping[frm.doc.incident_type];
+		if (sev) {
+			frm.set_value('severity', sev);
+		}
 	}
 });
