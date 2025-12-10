@@ -23,31 +23,31 @@ function update_severity_options(frm) {
 	}
 }
 
-frappe.ui.form.on("Incident Report", {
-	onload: function(frm) {
-		update_severity_options(frm);
-		// On load, if incident_type exists and severity is blank, set default
-		const mapping = {
-			"First Aid Case (FAC)": "Moderate",
-			"Lost Time Injury (LTI)": "High",
-			"Fatality": "Catastrophic",
-		};
-		const sev = mapping[frm.doc.incident_type];
-		if (sev && !frm.doc.severity) {
-			frm.set_value('severity', sev);
-		}
-	},
-	incident_type: function(frm) {
-		update_severity_options(frm);
-		// Always set mapped severity on type change (overwrite existing)
-		const mapping = {
-			"First Aid Case (FAC)": "Moderate",
-			"Lost Time Injury (LTI)": "High",
-			"Fatality": "Catastrophic",
-		};
-		const sev = mapping[frm.doc.incident_type];
-		if (sev) {
-			frm.set_value('severity', sev);
-		}
-	}
-});
+// frappe.ui.form.on("Incident Report", {
+// 	onload: function(frm) {
+// 		update_severity_options(frm);
+// 		// On load, if incident_type exists and severity is blank, set default
+// 		const mapping = {
+// 			"First Aid Case (FAC)": "Moderate",
+// 			"Lost Time Injury (LTI)": "High",
+// 			"Fatality": "Catastrophic",
+// 		};
+// 		const sev = mapping[frm.doc.incident_type];
+// 		if (sev && !frm.doc.severity) {
+// 			frm.set_value('severity', sev);
+// 		}
+// 	},
+// 	incident_type: function(frm) {
+// 		update_severity_options(frm);
+// 		// Always set mapped severity on type change (overwrite existing)
+// 		const mapping = {
+// 			"First Aid Case (FAC)": "Moderate",
+// 			"Lost Time Injury (LTI)": "High",
+// 			"Fatality": "Catastrophic",
+// 		};
+// 		const sev = mapping[frm.doc.incident_type];
+// 		if (sev) {
+// 			frm.set_value('severity', sev);
+// 		}
+// 	}
+// });
