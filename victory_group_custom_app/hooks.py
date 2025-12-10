@@ -139,7 +139,8 @@ app_license = "mit"
 
 doc_events = {
 	"Incident Report": {
-		"on_submit": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_on_submit"
+		"on_submit": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_on_submit",
+		"before_save": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.enforce_pending_signoff"
 	}
 }
 

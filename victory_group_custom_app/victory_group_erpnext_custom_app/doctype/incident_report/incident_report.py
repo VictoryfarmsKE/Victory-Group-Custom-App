@@ -21,6 +21,18 @@ class IncidentReport(Document):
             if dt and dt > now_datetime():
                 frappe.throw(_("Date cannot be in the future."))
 
+        # enforce minimum word counts
+        def _count_words(text):
+            if not text:
+                return 0
+            return len(text.strip().split())
+
+        desc_words = _count_words(self.description)
+        if desc_words < 50:
+            frappe.throw(_(f"Description must be at least 50 words (current: {desc_words})."))
+
+      
+
     @frappe.whitelist()
     def set_geolocation(self):
         set_geolocation_from_coordinates(self)
@@ -167,4 +179,24 @@ def notify_on_submit(doc, method=None):
         }).insert(ignore_permissions=True)
     except Exception:
         frappe.log_error(frappe.get_traceback(), f"Error sending incident notifications for {doc.name}")
+
+
+def enforce_pending_signoff(doc, method=None):
+    """Enforce root_cause word count when workflow_state transitions to 'Pending sign off'."""
+    try:
+        prev = doc.get_doc_before_save()
+        # frappe.log_error(f"Previous workflow state: {prev.workflow_state if prev else 'N/A'}; Current: {doc.workflow_state}")
+        prev_state = prev.workflow_state if prev else None
+        if prev_state != "Pending sign off" and doc.workflow_state == "Pending sign off":
+            def _count_words(text):
+                if not text:
+                    return 0
+                return len(text.strip().split())
+
+            root_words = _count_words(doc.get('root_cause'))
+            if root_words < 100:
+                frappe.throw(_(f"Root Cause must be at least 100 words before moving to Pending sign off (current: {root_words})."))
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Error enforcing Pending sign off requirements")
+        raise
 

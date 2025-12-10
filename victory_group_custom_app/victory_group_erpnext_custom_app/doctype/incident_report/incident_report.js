@@ -24,7 +24,7 @@ function update_severity_options(frm) {
 }
 
 frappe.ui.form.on("Incident Report", {
-	refresh: function(frm) {
+	onload: function(frm) {
 		update_severity_options(frm);
 		// On load, if incident_type exists and severity is blank, set default
 		const mapping = {

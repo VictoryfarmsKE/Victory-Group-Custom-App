@@ -6,16 +6,20 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "details_within_12hrs_tab",
   "section_break_frz6",
   "incident_title",
-  "date_and_time",
-  "reported_by",
-  "ppe_status",
   "incident_type",
   "incident_type_subcategory",
   "severity",
-  "description",
-  "immediate_causes",
+  "reported_by",
+  "date_and_time",
+  "location",
+  "location_description",
+  "fetch_geolocation",
+  "geolocation",
+  "latitude",
+  "longitude",
   "column_break_ouqa",
   "role_type",
   "victim",
@@ -23,11 +27,9 @@
   "victim_employee",
   "victim_employee_department",
   "victim_presence_status",
-  "location",
-  "fetch_geolocation",
-  "geolocation",
-  "latitude",
-  "longitude",
+  "ppe_status",
+  "description",
+  "immediate_causes",
   "amended_from",
   "tab_break_tkym",
   "root_cause",
@@ -59,8 +61,7 @@
   {
    "fieldname": "date_and_time",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
-   "label": "Date and Time",
+   "label": "Incident Date and Time",
    "reqd": 1
   },
   {
@@ -91,13 +92,15 @@
   {
    "fieldname": "incident_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Incident Type",
    "options": "\nNear Miss (NM)\nFirst Aid Case (FAC)\nLost Time Injury (LTI)\nFatality\nOthers",
    "reqd": 1
   },
   {
+   "description": "Include what happened (the incident) and how it was handled (the intervention)",
    "fieldname": "description",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text",
    "label": "Description",
    "reqd": 1
   },
@@ -108,14 +111,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:['Pending Full Submission','Pending sign off','Approved'].includes(doc.workflow_state)\r\n",
    "fieldname": "tab_break_tkym",
    "fieldtype": "Tab Break",
-   "label": "Findings",
-   "read_only_depends_on": "eval: doc.workflow_state != 'Pending Full Submission'"
+   "label": "Findings (within 48hrs)"
   },
   {
    "fieldname": "root_cause",
-   "fieldtype": "Small Text",
+   "fieldtype": "Long Text",
    "label": "Root Cause",
    "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'"
   },
@@ -130,6 +133,7 @@
    "depends_on": "eval: doc.location == 'Other'",
    "fieldname": "latitude",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Latitude",
    "mandatory_depends_on": "eval: doc.location == 'Other'"
   },
@@ -137,20 +141,21 @@
    "depends_on": "eval: doc.location == 'Other'",
    "fieldname": "longitude",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Longitude",
    "mandatory_depends_on": "eval: doc.location == 'Other'"
   },
   {
    "fieldname": "reported_by",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Reported By",
+   "options": "Employee",
    "reqd": 1
   },
   {
    "fieldname": "ppe_status",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "PPE Status",
    "options": "\nPPE required - not worn at all\nPPE required - not worn fully / properly\nPPE required - worn completely and properly\nNo PPE required",
    "reqd": 1
@@ -165,6 +170,7 @@
   {
    "fieldname": "location",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Location",
    "options": "Location",
    "reqd": 1
@@ -211,8 +217,20 @@
   {
    "fieldname": "severity",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Severity",
    "options": "\nLow\nModerate\nHigh\nCatastrophic\nLow Catastrophic",
+   "reqd": 1
+  },
+  {
+   "fieldname": "details_within_12hrs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details (within 12hrs)"
+  },
+  {
+   "fieldname": "location_description",
+   "fieldtype": "Small Text",
+   "label": "Location Description",
    "reqd": 1
   }
  ],
@@ -220,8 +238,8 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 10:18:23.022599",
- "modified_by": "christinek@victoryfarmskenya.com",
+ "modified": "2025-12-10 12:27:26.125841",
+ "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
  "naming_rule": "Expression",
