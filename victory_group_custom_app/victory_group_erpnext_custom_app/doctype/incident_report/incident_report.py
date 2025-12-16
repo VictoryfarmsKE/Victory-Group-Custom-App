@@ -29,9 +29,9 @@ class IncidentReport(Document):
 
         desc_words = _count_words(self.description)
         if desc_words < 50:
-            frappe.throw(_(f"Description must be at least 50 words (current: {desc_words})."))
-
-      
+            frappe.throw(
+                _(f"Description must be at least 50 words (current: {desc_words}).")
+            )
 
     @frappe.whitelist()
     def set_geolocation(self):
@@ -41,12 +41,17 @@ class IncidentReport(Document):
     def on_submit(self):
         # Check if there are any attachments linked to the document
         attachments = frappe.get_all(
-            'File', filters={'attached_to_doctype': self.doctype, 'attached_to_name': self.name}
+            "File",
+            filters={
+                "attached_to_doctype": self.doctype,
+                "attached_to_name": self.name,
+            },
         )
 
         if not attachments:
             frappe.throw(_("Please Attach Reference Document(s)."))
-   
+
+
 def _user_emails_from_role(role):
     users = frappe.get_all("Has Role", filters={"role": role}, fields=["parent"])
     emails = set()
@@ -58,6 +63,7 @@ def _user_emails_from_role(role):
                 emails.add(email)
     return list(emails)
 
+
 def _employee_user_email(employee_name):
     if not employee_name:
         return None
@@ -66,6 +72,7 @@ def _employee_user_email(employee_name):
         return frappe.get_value("User", user, "email")
     return None
 
+
 def _hod_user_email(department_name):
     if not department_name:
         return None
@@ -73,6 +80,7 @@ def _hod_user_email(department_name):
     if hod_employee:
         return _employee_user_email(hod_employee)
     return None
+
 
 def build_recipient_list(doc):
     """Return ordered unique emails for the document."""
@@ -105,6 +113,7 @@ def build_recipient_list(doc):
             seen.add(email)
     return ordered
 
+
 def recipients_for_incident(doc):
     """Select recipient group based on incident type and severity."""
     t = doc.get("incident_type")
@@ -122,7 +131,11 @@ def recipients_for_incident(doc):
             low_group.append(hod_email)
     low_group += _user_emails_from_role("HSE User - VF")
 
-    moderate_group = low_group + _user_emails_from_role("HR Manager") + _user_emails_from_role("Farm Ops Executive")
+    moderate_group = (
+        low_group
+        + _user_emails_from_role("HR Manager")
+        + _user_emails_from_role("Farm Ops Executive")
+    )
     high_group = moderate_group + _user_emails_from_role("CEO - VF")
     catastrophic_group = high_group + _user_emails_from_role("Chief")
 
@@ -141,23 +154,36 @@ def recipients_for_incident(doc):
             return catastrophic_group
     return low_group
 
+
 def notify_on_submit(doc, method=None):
     try:
         recipients = recipients_for_incident(doc)
         if not recipients:
-            frappe.log_error(message=f"No recipients resolved for Incident Report {doc.name}", title="Incident Notification: No recipients")
+            frappe.log_error(
+                message=f"No recipients resolved for Incident Report {doc.name}",
+                title="Incident Notification: No recipients",
+            )
             return
 
-        subject = f"[Incident] {doc.incident_title or doc.name} — {doc.incident_type} / {doc.severity}"
+        subject = f"Incident Notification — {doc.incident_type}"
         message = frappe.render_template(
-            "<p>An incident has been reported:</p>"
+            "<p>Hello,</p>"
+            "<p>An incident has been recorded in the ERP system:</p>"
+            "<p>&nbsp;</p>"
             "<ul>"
-            "<li><strong>Type:</strong> {{ doc.incident_type }}</li>"
-            "<li><strong>Severity:</strong> {{ doc.severity }}</li>"
-            "<li><strong>Title:</strong> {{ doc.incident_title }}</li>"
-            "<li><strong>Reported By:</strong> {{ doc.reported_by }}</li>"
+            "<li><strong>Person involved:</strong> {{ doc.reported_by }}</li>"
+            "<li><strong>Date:</strong> {{ doc.date_and_time }}</li>"
+            "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
+            "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
+            "<li><strong>Location:</strong> {{ doc.get('location') or 'Not specified' }}</li>"
             "</ul>"
-            "<p><a href='{{ url }}'>Open Incident Report</a></p>",
+            "<p>&nbsp;</p>"
+            "<p>You can view the full incident details and updates in the ERP system here: <a href='{{ url }}'>{{ url }}</a></p>"
+            "<p>&nbsp;</p>"
+            "<p>Please stay informed and take note of this incident.</p>"
+            "<p>&nbsp;</p>"
+            "<p>Best regards,</p>"
+            "<p><strong>Health & Safety Department</strong></p>",
             {"doc": doc, "url": frappe.utils.get_url_to_form(doc.doctype, doc.name)},
         )
         frappe.sendmail(
@@ -165,20 +191,25 @@ def notify_on_submit(doc, method=None):
             subject=subject,
             message=message,
             reference_doctype=doc.doctype,
-            reference_name=doc.name
+            reference_name=doc.name,
         )
-        frappe.get_doc({
-            "doctype": "Communication",
-            "communication_type": "Communication",
-            "subject": subject,
-            "content": sanitize_html(message),
-            "sender": frappe.session.user,
-            "recipients": ", ".join(recipients),
-            "reference_doctype": doc.doctype,
-            "reference_name": doc.name
-        }).insert(ignore_permissions=True)
+        frappe.get_doc(
+            {
+                "doctype": "Communication",
+                "communication_type": "Communication",
+                "subject": subject,
+                "content": sanitize_html(message),
+                "sender": frappe.session.user,
+                "recipients": ", ".join(recipients),
+                "reference_doctype": doc.doctype,
+                "reference_name": doc.name,
+            }
+        ).insert(ignore_permissions=True)
     except Exception:
-        frappe.log_error(frappe.get_traceback(), f"Error sending incident notifications for {doc.name}")
+        frappe.log_error(
+            frappe.get_traceback(),
+            f"Error sending incident notifications for {doc.name}",
+        )
 
 
 def enforce_pending_signoff(doc, method=None):
@@ -187,16 +218,25 @@ def enforce_pending_signoff(doc, method=None):
         prev = doc.get_doc_before_save()
         # frappe.log_error(f"Previous workflow state: {prev.workflow_state if prev else 'N/A'}; Current: {doc.workflow_state}")
         prev_state = prev.workflow_state if prev else None
-        if prev_state != "Pending sign off" and doc.workflow_state == "Pending sign off":
+        if (
+            prev_state != "Pending sign off"
+            and doc.workflow_state == "Pending sign off"
+        ):
+
             def _count_words(text):
                 if not text:
                     return 0
                 return len(text.strip().split())
 
-            root_words = _count_words(doc.get('root_cause'))
+            root_words = _count_words(doc.get("root_cause"))
             if root_words < 100:
-                frappe.throw(_(f"Root Cause must be at least 100 words before moving to Pending sign off (current: {root_words})."))
+                frappe.throw(
+                    _(
+                        f"Root Cause must be at least 100 words before moving to Pending sign off (current: {root_words})."
+                    )
+                )
     except Exception:
-        frappe.log_error(frappe.get_traceback(), "Error enforcing Pending sign off requirements")
+        frappe.log_error(
+            frappe.get_traceback(), "Error enforcing Pending sign off requirements"
+        )
         raise
-
