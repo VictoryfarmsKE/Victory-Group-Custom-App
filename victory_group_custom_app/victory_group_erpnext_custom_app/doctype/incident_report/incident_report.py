@@ -28,9 +28,15 @@ class IncidentReport(Document):
             return len(text.strip().split())
 
         desc_words = _count_words(self.description)
-        if desc_words < 50:
+        if desc_words < 25:
             frappe.throw(
-                _(f"Description must be at least 50 words (current: {desc_words}).")
+                _(f"Description must be at least 25 words (current: {desc_words}).")
+            )
+        #enforce minimum of 25 words for description_of_intervention
+        intervention_words = _count_words(self.description_of_intervention)
+        if intervention_words < 25:
+            frappe.throw(
+                _(f"Description of Intervention must be at least 25 words (current: {intervention_words}).")
             )
 
     @frappe.whitelist()
@@ -229,10 +235,10 @@ def enforce_pending_signoff(doc, method=None):
                 return len(text.strip().split())
 
             root_words = _count_words(doc.get("root_cause"))
-            if root_words < 100:
+            if root_words < 25:
                 frappe.throw(
                     _(
-                        f"Root Cause must be at least 100 words before moving to Pending sign off (current: {root_words})."
+                        f"Root Cause must be at least 25 words before moving to Pending sign off (current: {root_words})."
                     )
                 )
     except Exception:
