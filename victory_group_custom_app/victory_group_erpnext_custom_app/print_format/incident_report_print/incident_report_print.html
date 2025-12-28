@@ -1,0 +1,257 @@
+{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .incident-report table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .incident-report table td,
+  .incident-report table th {
+    border: 1px solid #9ca3af;
+    padding: 8px;
+    font-size: 12px;
+  }
+  .incident-report table th {
+    background-color: #f3f4f6;
+    text-align: left;
+    font-weight: bold;
+  }
+  .incident-report .header-table td {
+    vertical-align: middle;
+  }
+  .incident-report .title-cell {
+    text-align: center;
+  }
+  .incident-report .title-cell h1 {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .incident-report .section-header {
+    background-color: #f3f4f6;
+    font-weight: bold;
+    text-align: left;
+  }
+  .incident-report .content-cell {
+    line-height: 1.6;
+  }
+  .incident-report .content-cell ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .incident-report .content-cell ul li {
+    margin-bottom: 4px;
+  }
+  .incident-report .mb-6 {
+    margin-bottom: 16px;
+  }
+  .incident-report .logo-cell {
+    width: 120px;
+    text-align: center;
+  }
+  .incident-report .logo-cell img {
+    max-height: 60px;
+    max-width: 100px;
+  }
+  @media print {
+    .incident-report table {
+      page-break-inside: avoid;
+    }
+    .incident-report .page-break {
+      page-break-after: always;
+    }
+  }
+</style>
+
+<div class="incident-report">
+  <!-- HEADER TABLE -->
+  <table class="header-table mb-6">
+    <tr>
+      <!-- Logo -->
+      <td class="logo-cell">
+        {% if letter_head and not no_letterhead %}
+          {{ letter_head }}
+        {% else %}
+          <img src="/files/VF_Fish and text_Horizontal_GB NU_page-0001.jpg" alt="Company Logo">
+        {% endif %}
+      </td>
+      <!-- Title -->
+      <td class="title-cell">
+        <h1>
+          {% if doc.incident_type == "First Aid Case (FAC)" %}
+            First Aid Case Report
+          {% elif doc.incident_type == "Near Miss (NM)" %}
+            Near Miss Report
+          {% elif doc.incident_type == "Lost Time Injury (LTI)" %}
+            Lost Time Injury Report
+          {% elif doc.incident_type == "Fatality" %}
+            Fatality Report
+          {% else %}
+            Incident Report Form
+          {% endif %}
+        </h1>
+      </td>
+    </tr>
+  </table>
+
+  <!-- METADATA TABLE -->
+  <table class="mb-6">
+    <tr>
+      <td><strong>Report Number</strong></td>
+      <td>{{ doc.name }}</td>
+      <td><strong>Incident Classification</strong></td>
+      <td>{{ doc.incident_type or '-' }}{% if doc.incident_type_subcategory %} ({{ doc.incident_type_subcategory }}){% endif %}</td>
+    </tr>
+    <tr>
+      <td><strong>Date &amp; Time of Accident</strong></td>
+      <td>{{ frappe.utils.format_datetime(doc.date_and_time, "MMMM dd, yyyy – hh:mm a") if doc.date_and_time else '-' }}</td>
+      <td><strong>Department</strong></td>
+      <td>
+        {% if doc.role_type == 'Employee (FTE)' %}
+          {{ doc.victim_employee_department or '-' }}
+        {% else %}
+          {{ doc.department or '-' }}
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Victim</strong></td>
+      <td>
+        {% if doc.role_type == 'Employee (FTE)' %}
+          {{ frappe.db.get_value("Employee", doc.victim_employee, "employee_name") or doc.victim_employee or '-' }}
+        {% else %}
+          {{ doc.victim or '-' }}
+        {% endif %}
+      </td>
+      <td><strong>Witnesses</strong></td>
+      <td>{{ doc.witnesses or '-' }}</td>
+    </tr>
+    <tr>
+      <td><strong>Location</strong></td>
+      <td>{{ doc.location or '-' }}</td>
+      <td><strong>Reported By</strong></td>
+      <td>{{ frappe.db.get_value("Employee", doc.reported_by, "employee_name") or doc.reported_by or '-' }}</td>
+    </tr>
+    <tr>
+      <td><strong>Severity</strong></td>
+      <td>{{ doc.severity or '-' }}</td>
+      <td><strong>PPE Status</strong></td>
+      <td>{{ doc.ppe_status or '-' }}</td>
+    </tr>
+    <tr>
+      <td><strong>Role Type</strong></td>
+      <td>{{ doc.role_type or '-' }}</td>
+      <td><strong>Victim Presence Status</strong></td>
+      <td>{{ doc.victim_presence_status or '-' }}</td>
+    </tr>
+  </table>
+
+  <!-- INCIDENT DESCRIPTION -->
+  <table class="mb-6">
+    <tr>
+      <th class="section-header">Incident Description</th>
+    </tr>
+    <tr>
+      <td class="content-cell">
+        {{ doc.description or '-' }}
+        {% if doc.location_description %}
+          <br><br>
+          <strong>Location Details:</strong> {{ doc.location_description }}
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <!-- SEQUENCE OF EVENTS / IMMEDIATE CAUSES -->
+  <table class="mb-6">
+    <tr>
+      <th class="section-header">Immediate Causes</th>
+    </tr>
+    <tr>
+      <td class="content-cell">
+        {{ doc.immediate_causes or '-' }}
+      </td>
+    </tr>
+  </table>
+
+  <!-- DIRECT ACTIONS TAKEN -->
+  <table class="mb-6">
+    <tr>
+      <th class="section-header">Description of Intervention / Direct Actions Taken</th>
+    </tr>
+    <tr>
+      <td class="content-cell">
+        {{ doc.description_of_intervention or '-' }}
+      </td>
+    </tr>
+  </table>
+
+  {% if doc.root_cause %}
+  <!-- ROOT CAUSE ANALYSIS -->
+  <table class="mb-6">
+    <tr>
+      <th class="section-header">Root Cause Analysis (RCA)</th>
+    </tr>
+    <tr>
+      <td class="content-cell">
+        {{ doc.root_cause }}
+      </td>
+    </tr>
+  </table>
+  {% endif %}
+
+  {% if doc.corrective_actions and doc.corrective_actions|length > 0 %}
+  <!-- CAPA TABLE -->
+  <table class="mb-6">
+    <tr class="section-header">
+      <th>Action</th>
+      <th>Responsible</th>
+      <th>Completion Date</th>
+    </tr>
+    {% for action in doc.corrective_actions %}
+    <tr>
+      <td>{{ action.corrective_action or '-' }}</td>
+      <td>{{ frappe.db.get_value("User", action.user_responsible, "full_name") or action.user_responsible or '-' }}</td>
+      <td>{{ frappe.utils.format_date(action.date, "dd/MM/yyyy") if action.date else '-' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <!-- FOOTER -->
+  <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #d1d5db;">
+    <table style="border: none;">
+      <tr style="border: none;">
+        <td style="border: none; width: 50%; vertical-align: top; padding: 10px;">
+          <div style="border-bottom: 1px solid #374151; height: 40px; margin-bottom: 5px;"></div>
+          <div style="font-size: 10px; color: #6b7280;">
+            <strong>Reported By:</strong><br>
+            {{ frappe.db.get_value("Employee", doc.reported_by, "employee_name") or doc.reported_by or '________________' }}<br>
+            Date: {{ frappe.utils.format_date(doc.creation, "dd MMM yyyy") }}
+          </div>
+        </td>
+        <td style="border: none; width: 50%; vertical-align: top; padding: 10px;">
+          <div style="border-bottom: 1px solid #374151; height: 40px; margin-bottom: 5px;"></div>
+          <div style="font-size: 10px; color: #6b7280;">
+            <strong>Reviewed By (HSE):</strong><br>
+            ________________<br>
+            Date: ________________
+          </div>
+        </td>
+      </tr>
+    </table>
+    
+    <div style="text-align: center; font-size: 9px; color: #9ca3af; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+      <p>
+        This is a computer-generated document from the Victory Group HSE Management System.<br>
+        Report Generated: {{ frappe.utils.format_datetime(frappe.utils.now(), "dd MMMM yyyy, hh:mm a") }}<br>
+        Document ID: {{ doc.name }}
+      </p>
+    </div>
+  </div>
+</div>
