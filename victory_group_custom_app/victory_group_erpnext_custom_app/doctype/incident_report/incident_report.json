@@ -102,10 +102,9 @@
    "reqd": 1
   },
   {
-   "description": "Describe what happened",
    "fieldname": "description",
    "fieldtype": "Text",
-   "label": "Description of Incident",
+   "label": "Description of Incident - Describe what happened",
    "reqd": 1
   },
   {
@@ -236,10 +235,9 @@
    "reqd": 1
   },
   {
-   "description": "Describe how it was handled",
    "fieldname": "description_of_intervention",
    "fieldtype": "Text",
-   "label": "Description of Intervention",
+   "label": "Description of Intervention - Describe how it was handled",
    "reqd": 1
   },
   {
@@ -261,7 +259,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-19 11:36:45.664445",
+ "modified": "2025-12-29 14:17:34.332085",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",

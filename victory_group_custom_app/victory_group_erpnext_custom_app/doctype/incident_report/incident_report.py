@@ -43,20 +43,6 @@ class IncidentReport(Document):
     def set_geolocation(self):
         set_geolocation_from_coordinates(self)
 
-    # before submit ensure attachments are added to the document
-    def on_submit(self):
-        # Check if there are any attachments linked to the document
-        attachments = frappe.get_all(
-            "File",
-            filters={
-                "attached_to_doctype": self.doctype,
-                "attached_to_name": self.name,
-            },
-        )
-
-        if not attachments:
-            frappe.throw(_("Please Attach Reference Document(s)."))
-
 
 def _user_emails_from_role(role):
     users = frappe.get_all("Has Role", filters={"role": role}, fields=["parent"])
@@ -241,6 +227,17 @@ def enforce_pending_signoff(doc, method=None):
                         f"Root Cause must be at least 25 words before moving to Pending sign off (current: {root_words})."
                     )
                 )
+            # Check if there are any attachments linked to the document
+            attachments = frappe.get_all(
+                "File",
+                filters={
+                    "attached_to_doctype": doc.doctype,
+                    "attached_to_name": doc.name,
+                },
+            )
+
+            if not attachments:
+                frappe.throw(_("Please Attach Reference Document(s)."))
     except Exception:
         frappe.log_error(
             frappe.get_traceback(), "Error enforcing Pending sign off requirements"
