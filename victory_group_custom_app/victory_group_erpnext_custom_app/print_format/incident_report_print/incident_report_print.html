@@ -123,7 +123,7 @@
       <td><strong>Victim</strong></td>
       <td>
         {% if doc.role_type == 'Employee (FTE)' %}
-          {{ frappe.db.get_value("Employee", doc.victim_employee, "employee_name") or doc.victim_employee or '-' }}
+          {{ doc.victim_employee_name or doc.victim_employee or '-' }}
         {% else %}
           {{ doc.victim or '-' }}
         {% endif %}
@@ -135,7 +135,7 @@
       <td><strong>Location</strong></td>
       <td>{{ doc.location or '-' }}</td>
       <td><strong>Reported By</strong></td>
-      <td>{{ frappe.db.get_value("Employee", doc.reported_by, "employee_name") or doc.reported_by or '-' }}</td>
+      <td>{{ doc.reported_by_name or doc.reported_by or '-' }}</td>
     </tr>
     <tr>
       <td><strong>Severity</strong></td>
@@ -231,7 +231,7 @@
           <div style="border-bottom: 1px solid #374151; height: 40px; margin-bottom: 5px;"></div>
           <div style="font-size: 10px; color: #6b7280;">
             <strong>Reported By:</strong><br>
-            {{ frappe.db.get_value("Employee", doc.reported_by, "employee_name") or doc.reported_by or '________________' }}<br>
+            {{ doc.reported_by_name or doc.reported_by or '________________' }}<br>
             Date: {{ frappe.utils.format_date(doc.creation, "dd MMM yyyy") }}
           </div>
         </td>

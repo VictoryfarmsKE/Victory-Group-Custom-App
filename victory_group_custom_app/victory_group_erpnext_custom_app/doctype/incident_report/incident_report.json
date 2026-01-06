@@ -13,6 +13,7 @@
   "incident_type_subcategory",
   "severity",
   "reported_by",
+  "reported_by_name",
   "date_and_time",
   "witnesses",
   "location",
@@ -26,6 +27,7 @@
   "victim",
   "department",
   "victim_employee",
+  "victim_employee_name",
   "victim_employee_department",
   "victim_presence_status",
   "ppe_status",
@@ -109,7 +111,7 @@
   },
   {
    "fieldname": "immediate_causes",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Immediate Causes",
    "reqd": 1
   },
@@ -149,10 +151,17 @@
   {
    "fieldname": "reported_by",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Reported By",
    "options": "Employee",
    "reqd": 1
+  },
+  {
+   "fetch_from": "reported_by.employee_name",
+   "fieldname": "reported_by_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reported By Name",
+   "read_only": 1
   },
   {
    "fieldname": "ppe_status",
@@ -197,6 +206,15 @@
    "label": "Victim (Employee)",
    "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "options": "Employee"
+  },
+  {
+   "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
+   "fetch_from": "victim_employee.employee_name",
+   "fieldname": "victim_employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Victim Employee Name",
+   "read_only": 1
   },
   {
    "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
@@ -259,7 +277,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-30 12:06:35.156023",
+ "modified": "2026-01-06 15:33:47.359741",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
