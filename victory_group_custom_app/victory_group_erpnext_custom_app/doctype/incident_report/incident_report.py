@@ -90,11 +90,11 @@ def build_recipient_list(doc):
         if hod_email:
             recipients.append(hod_email)
 
-    recipients += _user_emails_from_role("HSE User - VF")
-    recipients += _user_emails_from_role("Farm Ops Executive")
+    recipients += _user_emails_from_role("HSE User")
+    recipients += _user_emails_from_role("Farm Operations Manager")
     recipients += _user_emails_from_role("HR Manager")
-    recipients += _user_emails_from_role("CEO - VF")
-    recipients += _user_emails_from_role("Chief")
+    recipients += _user_emails_from_role("CEO")
+    recipients += _user_emails_from_role("GCEO")
 
     # Deduplicate preserving order
     seen = set()
@@ -121,20 +121,20 @@ def recipients_for_incident(doc):
         hod_email = _hod_user_email(doc.victim_employee_department)
         if hod_email:
             low_group.append(hod_email)
-    low_group += _user_emails_from_role("HSE User - VF")
+    low_group += _user_emails_from_role("HSE User")
 
     moderate_group = (
         low_group
         + _user_emails_from_role("HR Manager")
         + _user_emails_from_role("Farm Ops Executive")
     )
-    high_group = moderate_group + _user_emails_from_role("CEO - VF")
-    catastrophic_group = high_group + _user_emails_from_role("Chief")
+    high_group = moderate_group + _user_emails_from_role("CEO")
+    catastrophic_group = high_group + _user_emails_from_role("GCEO")
 
     if t == "Near Miss (NM)":
         return low_group + _user_emails_from_role("Farm Ops Executive")
     if t == "First Aid Case (FAC)":
-        return moderate_group + _user_emails_from_role("CEO - VF")
+        return moderate_group + _user_emails_from_role("CEO")
     if t in ("Lost Time Injury (LTI)", "Fatality"):
         return catastrophic_group
     if t == "Others":
