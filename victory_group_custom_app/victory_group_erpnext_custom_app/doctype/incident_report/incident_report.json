@@ -170,10 +170,10 @@
   },
   {
    "fieldname": "location",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Location",
-   "options": "Location",
+   "options": "\nFishQ\nRoo Farm\nBranch\nMLC\nKLC\nFLC\nVLC\n106\nOther",
    "reqd": 1
   },
   {
@@ -259,7 +259,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 13:16:57.184466",
+ "modified": "2026-01-15 16:04:30.462379",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
