@@ -71,7 +71,7 @@
    "depends_on": "eval: doc.role_type != 'Employee (FTE)'",
    "fieldname": "victim",
    "fieldtype": "Data",
-   "label": "Victim",
+   "label": "Victim Name",
    "mandatory_depends_on": "eval: doc.role_type != 'Employee (FTE)'"
   },
   {
@@ -104,7 +104,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text",
-   "label": "Description of Incident - Describe what happened",
+   "label": "Description of Incident - Describe what happened (minimum 25 words)",
    "reqd": 1
   },
   {
@@ -179,7 +179,7 @@
   {
    "fieldname": "role_type",
    "fieldtype": "Select",
-   "label": "Role Type",
+   "label": "Victim Role Type",
    "options": "\nEmployee (FTE)\nCasual\nContractor\nSupplier\nVisitor",
    "reqd": 1
   },
@@ -194,7 +194,7 @@
    "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "fieldname": "victim_employee",
    "fieldtype": "Link",
-   "label": "Victim (Employee)",
+   "label": "Victim Name (Employee)",
    "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "options": "Employee"
   },
@@ -237,7 +237,7 @@
   {
    "fieldname": "description_of_intervention",
    "fieldtype": "Text",
-   "label": "Description of Intervention - Describe how it was handled",
+   "label": "Description of Intervention - Describe how it was handled (minimum 25 words)",
    "reqd": 1
   },
   {
@@ -259,7 +259,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 14:52:43.180602",
+ "modified": "2026-01-15 13:16:57.184466",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
