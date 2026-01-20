@@ -42,110 +42,79 @@ class IncidentReport(Document):
     @frappe.whitelist()
     def set_geolocation(self):
         set_geolocation_from_coordinates(self)
+        
+def _user_emails_from_mailing_list(role):
+    mailing_list = frappe.get_doc("Mailing List", role)
+    emails = []
+    for user in mailing_list.users:
+        emails.append(user.user)
+    return emails
 
-
-def _user_emails_from_role(role):
-    users = frappe.get_all("Has Role", filters={"role": role}, fields=["parent"])
-    emails = set()
-    for u in users:
-        user = u.get("parent")
-        if user:
-            email = frappe.get_value("User", user, "email")
-            if email:
-                emails.add(email)
-    return list(emails)
-
-
-def _employee_user_email(employee_name):
+def _linemanager_user_email(employee_name):
     if not employee_name:
         return None
-    user = frappe.get_value("Employee", employee_name, "user_id")
-    if user:
-        return frappe.get_value("User", user, "email")
-    return None
-
+    if employee_name:
+        reports_to = frappe.get_value("Employee", employee_name, "reports_to")
+        if reports_to:
+            manager_user = frappe.get_value("Employee", reports_to, "user_id")
+            if manager_user:
+                status = frappe.get_value("User", manager_user, "enabled")
+                if status == "1":
+                    return frappe.get_value("User", manager_user, "email")
+        return manager_user
 
 def _hod_user_email(department_name):
     if not department_name:
         return None
     hod_employee = frappe.get_value("Department", department_name, "custom_hod")
     if hod_employee:
-        return _employee_user_email(hod_employee)
-    return None
-
-
-def build_recipient_list(doc):
-    """Return ordered unique emails for the document."""
-    recipients = []
-
-    # Line Manager
-    if doc.get("role_type") == "Employee (FTE)" and doc.get("victim_employee"):
-        lm_email = _employee_user_email(doc.victim_employee)
-        if lm_email:
-            recipients.append(lm_email)
-
-    # HOD
-    if doc.get("victim_employee_department"):
-        hod_email = _hod_user_email(doc.victim_employee_department)
-        if hod_email:
-            recipients.append(hod_email)
-
-    recipients += _user_emails_from_role("HSE User - VF")
-    recipients += _user_emails_from_role("Farm Ops Executive")
-    recipients += _user_emails_from_role("HR Manager")
-    recipients += _user_emails_from_role("CEO - VF")
-    recipients += _user_emails_from_role("Chief")
-
-    # Deduplicate preserving order
-    seen = set()
-    ordered = []
-    for email in recipients:
-        if email and email not in seen:
-            ordered.append(email)
-            seen.add(email)
-    return ordered
-
+            hod = frappe.get_value("Employee", hod_employee, "user_id")
+            if hod:
+                status = frappe.get_value("User", hod_employee, "enabled")
+                if status == "1":
+                    return frappe.get_value("User", hod_employee, "email")
+    return hod
 
 def recipients_for_incident(doc):
     """Select recipient group based on incident type and severity."""
     t = doc.get("incident_type")
     s = doc.get("severity")
 
-    # Build groups
-    low_group = []
+    # Build groups and Deduplicate them to preserve order
+    low_moderate_group = []
+    
+    #get line manager email if role_type is Employee (FTE) and victim_employee is set
     if doc.get("role_type") == "Employee (FTE)" and doc.get("victim_employee"):
-        lm_email = _employee_user_email(doc.victim_employee)
+        lm_email = _linemanager_user_email(doc.victim_employee)
         if lm_email:
-            low_group.append(lm_email)
-    if doc.get("victim_employee_department"):
+            low_moderate_group.append(lm_email)
+            
+    #get HOD email if victim_employee_department or department is set    
+    if doc.get("victim_employee_department") or doc.get("department"):
         hod_email = _hod_user_email(doc.victim_employee_department)
         if hod_email:
-            low_group.append(hod_email)
-    low_group += _user_emails_from_role("HSE User - VF")
-
-    moderate_group = (
-        low_group
-        + _user_emails_from_role("HR Manager")
-        + _user_emails_from_role("Farm Ops Executive")
+            low_moderate_group.append(hod_email)
+            
+    low_moderate_group += _user_emails_from_mailing_list("Tier 1")
+    # low_moderate_group 
+    high_catastrophic_group = (
+        low_moderate_group + _user_emails_from_mailing_list("Tier 2")
     )
-    high_group = moderate_group + _user_emails_from_role("CEO - VF")
-    catastrophic_group = high_group + _user_emails_from_role("Chief")
 
     if t == "Near Miss (NM)":
-        return low_group + _user_emails_from_role("Farm Ops Executive")
+        return low_moderate_group
     if t == "First Aid Case (FAC)":
-        return moderate_group + _user_emails_from_role("CEO - VF")
+        return low_moderate_group
     if t in ("Lost Time Injury (LTI)", "Fatality"):
-        return catastrophic_group
+        return high_catastrophic_group
     if t == "Others":
         if s == "Low":
-            return low_group
+            return low_moderate_group
         if s == "Moderate":
-            return moderate_group
+            return low_moderate_group
         if s in ("High", "Catastrophic"):
-            return catastrophic_group
-    return low_group
-
+            return high_catastrophic_group
+    return low_moderate_group
 
 def notify_on_submit(doc, method=None):
     try:
@@ -157,52 +126,154 @@ def notify_on_submit(doc, method=None):
             )
             return
 
-        subject = f"Incident Notification — {doc.incident_type}"
-        message = frappe.render_template(
-            "<p>Hello,</p>"
-            "<p>An incident has been recorded in the ERP system:</p>"
-            "<p>&nbsp;</p>"
-            "<ul>"
-            "<li><strong>Person involved:</strong> {{ doc.reported_by }}</li>"
-            "<li><strong>Date:</strong> {{ doc.date_and_time }}</li>"
-            "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
-            "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
-            "<li><strong>Location:</strong> {{ doc.get('location') or 'Not specified' }}</li>"
-            "</ul>"
-            "<p>&nbsp;</p>"
-            "<p>You can view the full incident details and updates in the ERP system here: <a href='{{ url }}'>{{ url }}</a></p>"
-            "<p>&nbsp;</p>"
-            "<p>Please stay informed and take note of this incident.</p>"
-            "<p>&nbsp;</p>"
-            "<p>Best regards,</p>"
-            "<p><strong>Health & Safety Department</strong></p>",
-            {"doc": doc, "url": frappe.utils.get_url_to_form(doc.doctype, doc.name)},
+        # Log resolved recipients
+        frappe.log_error(
+            message=f"Recipients resolved for Incident Report {doc.name}: {recipients}",
+            title="Incident Notification: Recipients Fetched",
         )
-        frappe.sendmail(
-            recipients=recipients,
-            subject=subject,
-            message=message,
-            reference_doctype=doc.doctype,
-            reference_name=doc.name,
-        )
-        frappe.get_doc(
-            {
-                "doctype": "Communication",
-                "communication_type": "Communication",
-                "subject": subject,
-                "content": sanitize_html(message),
-                "sender": frappe.session.user,
-                "recipients": ", ".join(recipients),
-                "reference_doctype": doc.doctype,
-                "reference_name": doc.name,
-            }
-        ).insert(ignore_permissions=True)
+
+        subject = f"Incident Notification — {doc.incident_type} - {doc.severity} severity - Full Report"
+
+        # Determine person involved and formatted date once
+        person_involved = doc.victim if doc.get("victim") else doc.get("victim_employee")
+        #Resolve victim_empployee name from Employee doctype
+        if doc.get("victim_employee"):
+            emp_name = frappe.get_value("Employee", doc.victim_employee, "employee_name")
+            if emp_name:
+                person_involved = emp_name
+
+        for recipient in recipients:
+            try:
+                # Resolve recipient display name
+                try:
+                    user = frappe.get_doc("User", recipient)
+                    recipient_name = user.first_name if user.first_name else (user.email or recipient)
+                except Exception:
+                    recipient_name = recipient
+
+                message = frappe.render_template(
+                    "<p>Dear {{ recipient_name }},</p>"
+                    "<p>An incident has been recorded in the ERP system:</p>"
+                    "<p>&nbsp;</p>"
+                    "<ul>"
+                    "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
+                    "<li><strong>Location:</strong> {{ doc.location or 'Not specified' }}</li>"
+                    "<li><strong>Date:</strong> {{ frappe.format_datetime(doc.date_and_time, format='dd MMMM yyyy hh:mm a') }}</li>"
+                    "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
+                    "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
+                    "</ul>"
+                    "<p>&nbsp;</p>"
+                    "<p>You can view the incident details and updates in the ERP system here: <a href='{{ url }}'>{{ url }}</a></p>"
+                    "<p>&nbsp;</p>"
+                    "<p>Please stay informed and take note of this incident.</p>"
+                    "<p>&nbsp;</p>"
+                    "<p>Best regards,</p>"
+                    "<p><strong>Health & Safety Department</strong></p>",
+                    {
+                        "doc": doc,
+                        "url": frappe.utils.get_url_to_form(doc.doctype, doc.name),
+                        "recipient_name": recipient_name,
+                        "person_involved": person_involved
+                    },
+                )
+
+                frappe.sendmail(
+                    recipients=[recipient],
+                    subject=subject,
+                    message=message,
+                    reference_doctype=doc.doctype,
+                    reference_name=doc.name,
+                )
+            except Exception:
+                frappe.log_error(
+                    frappe.get_traceback(),
+                    f"Error sending incident notification to {recipient} for {doc.name}",
+                )
     except Exception:
         frappe.log_error(
             frappe.get_traceback(),
             f"Error sending incident notifications for {doc.name}",
         )
 
+def notify_on_create(doc, method=None):
+    try:
+            recipients = recipients_for_incident(doc)
+            if not recipients:
+                frappe.log_error(
+                    message=f"No recipients resolved for Incident Report {doc.name}",
+                    title="Incident Notification: No recipients",
+                )
+                return
+
+            # Log resolved recipients
+            frappe.log_error(
+                message=f"Recipients resolved for Incident Report {doc.name}: {recipients}",
+                title="Incident Notification: Recipients Fetched",
+            )
+
+            subject = f"Incident Notification — {doc.incident_type} - {doc.severity} severity - Preliminary Report"
+
+            # Determine person involved
+            person_involved = doc.victim if doc.get("victim") else doc.get("victim_employee")
+            #Resolve victim_empployee name from Employee doctype
+            if doc.get("victim_employee"):
+                emp_name = frappe.get_value("Employee", doc.victim_employee, "employee_name")
+                if emp_name:
+                    person_involved = emp_name
+            
+
+            for recipient in recipients:
+                try:
+                    # Resolve recipient display name
+                    try:
+                        user = frappe.get_doc("User", recipient)
+                        recipient_name = user.first_name if user.first_name else (user.email or recipient)
+                    except Exception:
+                        recipient_name = recipient
+
+                    message = frappe.render_template(
+                        "<p>Dear {{ recipient_name }},</p>"
+                        "<p>An incident has been recorded in the ERP system:</p>"
+                        "<p>&nbsp;</p>"
+                        "<ul>"
+                        "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
+                        "<li><strong>Location:</strong> {{ doc.location or 'Not specified' }}</li>"
+                        "<li><strong>Date:</strong>{{ frappe.format_datetime(doc.date_and_time, format='dd MMMM yyyy hh:mm a') }}</li>"
+                        "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
+                        "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
+                        "</ul>"
+                        "<p>&nbsp;</p>"
+                        "<p>You can view the incident details and updates in the ERP system here: <a href='{{ url }}'>{{ url }}</a></p>"
+                        "<p>&nbsp;</p>"
+                        "<p>Please stay informed and take note of this incident.</p>"
+                        "<p>&nbsp;</p>"
+                        "<p>Best regards,</p>"
+                        "<p><strong>Health & Safety Department</strong></p>",
+                        {
+                            "doc": doc,
+                            "url": frappe.utils.get_url_to_form(doc.doctype, doc.name),
+                            "recipient_name": recipient_name,
+                            "person_involved": person_involved,
+                        },
+                    )
+
+                    frappe.sendmail(
+                        recipients=[recipient],
+                        subject=subject,
+                        message=message,
+                        reference_doctype=doc.doctype,
+                        reference_name=doc.name,
+                    )
+                except Exception:
+                    frappe.log_error(
+                        frappe.get_traceback(),
+                        f"Error sending incident notification to {recipient} for {doc.name}",
+                    )
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            f"Error sending incident notifications for {doc.name}",
+        )
 
 def enforce_pending_signoff(doc, method=None):
     """Enforce root_cause word count when workflow_state transitions to 'Pending sign off'."""
@@ -239,7 +310,7 @@ def enforce_pending_signoff(doc, method=None):
             if not attachments:
                 frappe.throw(_("Please Attach Reference Document(s)."))
     except Exception:
-        frappe.log_error(
-            frappe.get_traceback(), "Error enforcing Pending sign off requirements"
-        )
+        # frappe.log_error(
+        #     frappe.get_traceback(), "Error enforcing Pending sign off requirements"
+        # )
         raise
