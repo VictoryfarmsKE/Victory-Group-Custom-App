@@ -173,7 +173,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Location",
-   "options": "\nFishQ\nRoo Farm\nBranch\nMLC\nKLC\nFLC\nVLC\n106\nOther",
+   "options": "\nKagano\nKigembe\nMwaga\nKigali LC\nKamembe LC\nGisenyi LC\nKigali Main Office",
    "reqd": 1
   },
   {
