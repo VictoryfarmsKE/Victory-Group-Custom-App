@@ -127,10 +127,10 @@ def notify_on_submit(doc, method=None):
             return
 
         # Log resolved recipients
-        frappe.log_error(
-            message=f"Recipients resolved for Incident Report {doc.name}: {recipients}",
-            title="Incident Notification: Recipients Fetched",
-        )
+        # frappe.log_error(
+        #     message=f"Recipients resolved for Incident Report {doc.name}: {recipients}",
+        #     title="Incident Notification: Recipients Fetched",
+        # )
 
         subject = f"Incident Notification — {doc.incident_type} - {doc.severity} severity - Full Report"
 
@@ -158,7 +158,7 @@ def notify_on_submit(doc, method=None):
                     "<ul>"
                     "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
                     "<li><strong>Location:</strong> {{ doc.location or 'Not specified' }}</li>"
-                    "<li><strong>Date:</strong> {{ frappe.format_datetime(doc.date_and_time, format='dd MMMM yyyy hh:mm a') }}</li>"
+                    "<li><strong>Date:</strong> {{frappe.format_date(doc.posting_date, format='DD MMMM YYYY')}}</li>"
                     "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
                     "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
                     "</ul>"
@@ -238,7 +238,7 @@ def notify_on_create(doc, method=None):
                         "<ul>"
                         "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
                         "<li><strong>Location:</strong> {{ doc.location or 'Not specified' }}</li>"
-                        "<li><strong>Date:</strong>{{ frappe.format_datetime(doc.date_and_time, format='dd MMMM yyyy hh:mm a') }}</li>"
+                        "<li><strong>Date:</strong> {{frappe.format_date(doc.posting_date, format='DD MMMM YYYY')}}</li>"
                         "<li><strong>Incident Type:</strong> {{ doc.incident_type }}</li>"
                         "<li><strong>Short Description:</strong> {{ doc.incident_title }}</li>"
                         "</ul>"
