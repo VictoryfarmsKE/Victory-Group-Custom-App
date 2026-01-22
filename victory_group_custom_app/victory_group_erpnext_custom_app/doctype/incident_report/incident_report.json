@@ -173,7 +173,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Location",
-   "options": "\nKagano\nKigembe\nMwaga\nKigali LC\nKamembe LC\nGisenyi LC\nKigali Main Office",
+   "options": "\nKagano Farm\nKigembe Hatchery\nMwaga Site\nKigali LC\nKamembe LC\nGisenyi LC\nKigali Main Office\nOther",
    "reqd": 1
   },
   {
