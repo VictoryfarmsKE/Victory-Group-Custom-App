@@ -204,8 +204,8 @@ def notify_on_submit(doc, method=None):
         )
 
 def notify_on_create(doc, method=None):
-    if not _enabled():
-        return
+    # if not _enabled():
+    #     return
 
     try:
             recipients = recipients_for_incident(doc)
