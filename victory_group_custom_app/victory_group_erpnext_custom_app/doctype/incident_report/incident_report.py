@@ -116,13 +116,7 @@ def recipients_for_incident(doc):
             return high_catastrophic_group
     return low_moderate_group
 
-# def _enabled():
-#     # reads from site_config.json -> "kc_custom_app_notifications_feature_enabled": 1
-#     return bool(frappe.conf.get("kc_custom_app_notifications_feature_enabled"))
-
 def notify_on_submit(doc, method=None):
-    # if not _enabled():
-    #     return
 
     try:
         recipients = recipients_for_incident(doc)
@@ -204,9 +198,6 @@ def notify_on_submit(doc, method=None):
         )
 
 def notify_on_create(doc, method=None):
-    # if not _enabled():
-    #     return
-
     try:
             recipients = recipients_for_incident(doc)
             if not recipients:
