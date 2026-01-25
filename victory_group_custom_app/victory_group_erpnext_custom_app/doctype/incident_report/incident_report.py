@@ -53,15 +53,20 @@ def _user_emails_from_mailing_list(role):
 def _linemanager_user_email(employee_name):
     if not employee_name:
         return None
-    if employee_name:
-        reports_to = frappe.get_value("Employee", employee_name, "reports_to")
-        if reports_to:
-            manager_user = frappe.get_value("Employee", reports_to, "user_id")
-            if manager_user:
-                status = frappe.get_value("User", manager_user, "enabled")
-                if status == "1":
-                    return frappe.get_value("User", manager_user, "email")
+
+    reports_to = frappe.get_value("Employee", employee_name, "reports_to")
+    if not reports_to:
+        return None
+
+    manager_user = frappe.get_value("Employee", reports_to, "user_id")
+    if not manager_user:
+        return None
+
+    enabled = frappe.get_value("User", manager_user, "enabled")
+    if int(enabled or 0) == 1:
         return manager_user
+
+    return None
 
 def _hod_user_email(department_name):
     if not department_name:
@@ -89,11 +94,16 @@ def recipients_for_incident(doc):
         if lm_email:
             low_moderate_group.append(lm_email)
             
-    #get HOD email if victim_employee_department or department is set    
-    if doc.get("victim_employee_department") or doc.get("department"):
-        hod_email = _hod_user_email(doc.victim_employee_department)
-        if hod_email:
-            low_moderate_group.append(hod_email)
+    # get HOD email if victim_employee_department OR department is set
+    dept = doc.get("victim_employee_department") or doc.get("department")
+    if dept:
+        try:
+            hod_email = _hod_user_email(dept)
+            if hod_email:
+                low_moderate_group.append(hod_email)
+        except Exception:
+            # don't block Tier 1 emails if HOD lookup fails
+            pass
             
     low_moderate_group += _user_emails_from_mailing_list("Tier 1")
     # low_moderate_group 
@@ -116,13 +126,7 @@ def recipients_for_incident(doc):
             return high_catastrophic_group
     return low_moderate_group
 
-# def _enabled():
-#     # reads from site_config.json -> "kc_custom_app_notifications_feature_enabled": 1
-#     return bool(frappe.conf.get("kc_custom_app_notifications_feature_enabled"))
-
 def notify_on_submit(doc, method=None):
-    # if not _enabled():
-    #     return
 
     try:
         recipients = recipients_for_incident(doc)
@@ -204,8 +208,6 @@ def notify_on_submit(doc, method=None):
         )
 
 def notify_on_create(doc, method=None):
-    # if not _enabled():
-    #     return
 
     try:
             recipients = recipients_for_incident(doc)
