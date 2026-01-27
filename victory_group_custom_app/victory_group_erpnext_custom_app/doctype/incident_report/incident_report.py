@@ -153,7 +153,7 @@ def notify_on_submit(doc, method=None):
 
                 message = frappe.render_template(
                     "<p>Dear {{ recipient_name }},</p>"
-                    "<p>An incident has been recorded in the ERP system:</p>"
+                    "<p>Earlier you were notified about an incident that had taken place. The ERP report of this incident is now <strong>complete:</strong></p>"
                     "<p>&nbsp;</p>"
                     "<ul>"
                     "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
@@ -234,7 +234,7 @@ def notify_on_create(doc, method=None):
 
                     message = frappe.render_template(
                         "<p>Dear {{ recipient_name }},</p>"
-                        "<p>An incident has been recorded in the ERP system:</p>"
+                        "<p>An incident has taken place in the last 12 hours which has been recorded in ERP. The status of this report is <strong>preliminary:</strong></p>"
                         "<p>&nbsp;</p>"
                         "<ul>"
                         "<li><strong>Person involved:</strong> {{ person_involved }}</li>"
