@@ -14,7 +14,7 @@ function update_severity_options(frm) {
 
 	if (restricted_types.includes(frm.doc.incident_type)) {
 		frm.set_df_property('severity', 'options', restricted_options);
-		const allowed = ['Moderate', 'High', 'Catastrophic'];
+		const allowed = ['Low', 'Moderate', 'High', 'Catastrophic'];
 		if (frm.doc.severity && !allowed.includes(frm.doc.severity)) {
 			frm.set_value('severity', null);
 		}
