@@ -329,3 +329,68 @@ def enforce_pending_signoff(doc, method=None):
         #     frappe.get_traceback(), "Error enforcing Pending sign off requirements"
         # )
         raise
+
+def notify_hse_reviewer_on_transition(doc, method=None):
+    """
+    Sends an email to HSE Reviewers when the workflow moves into 
+    'Pending Acknowledgement' or 'Pending sign off'.
+    """
+    try:
+        # 1. Identify the states that require HSE Reviewer action
+        target_states = ["Pending Acknowledgement", "Pending sign off"]
+        
+        # 2. Get the previous state to ensure we only send on a NEW transition
+        prev_doc = doc.get_doc_before_save()
+        prev_state = prev_doc.workflow_state if prev_doc else None
+
+        # 3. Check if we just entered one of our target states
+        if doc.workflow_state in target_states and prev_state != doc.workflow_state:
+            
+            # 4. Fetch all active users with the 'HSE Reviewer' role
+            reviewers = frappe.get_all(
+                "Has Role",
+                filters={"role": "HSE Reviewer", "parenttype": "User"},
+                fields=["parent"]
+            )
+            
+            recipient_emails = [
+                r.parent for r in reviewers 
+                if frappe.db.get_value("User", r.parent, "enabled") == 1
+            ]
+
+            if not recipient_emails:
+                return
+
+            # 5. Prepare the notification
+            url = frappe.utils.get_url_to_form(doc.doctype, doc.name)
+            subject = f"Action Required: Incident Report {doc.name} is {doc.workflow_state}"
+            
+            # Context-aware message based on the state
+            action_type = "acknowledge" if doc.workflow_state == "Pending Acknowledgement" else "sign off on"
+            
+            message = f"""
+                <p>Hello,</p>
+                <p>An Incident Report has reached a stage requiring your action.</p>
+                <ul>
+                    <li><strong>ID:</strong> {doc.name}</li>
+                    <li><strong>Current Status:</strong> {doc.workflow_state}</li>
+                    <li><strong>Severity:</strong> {doc.severity}</li>
+                </ul>
+                <p>Please click below to {action_type} this report:</p>
+                <p><a href="{url}" style="background-color: #04b404; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">Open Incident Report</a></p>
+                <br>
+                <p>Best regards,<br>Health & Safety Department</p>
+            """
+
+            # 6. Send email (No attachment included by default)
+            frappe.sendmail(
+                recipients=recipient_emails,
+                subject=subject,
+                message=message,
+                reference_doctype=doc.doctype,
+                reference_name=doc.name,
+                now=True # Sends immediately rather than waiting for the background queue
+            )
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "HSE Reviewer Workflow Notification Error")

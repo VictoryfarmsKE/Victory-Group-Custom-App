@@ -141,7 +141,8 @@ doc_events = {
 	"Incident Report": {
 		"on_submit": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_on_submit",
 		"after_insert": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_on_create",
-		"before_save": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.enforce_pending_signoff"
+		"before_save": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.enforce_pending_signoff",
+		"on_update": "victory_group_custom_app.victory_group_erpnext_custom_app.doctype.incident_report.incident_report.notify_hse_reviewer_on_transition"
 	}
 }
 
