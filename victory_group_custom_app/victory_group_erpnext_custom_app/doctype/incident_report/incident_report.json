@@ -71,8 +71,7 @@
    "depends_on": "eval: doc.role_type != 'Employee (FTE)'",
    "fieldname": "victim",
    "fieldtype": "Data",
-   "label": "Victim Name",
-   "mandatory_depends_on": "eval: doc.role_type != 'Employee (FTE)'"
+   "label": "Victim Name"
   },
   {
    "fieldname": "column_break_ouqa",
@@ -83,7 +82,6 @@
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Victim Department",
-   "mandatory_depends_on": "eval: doc.role_type == 'Casual'",
    "options": "Department"
   },
   {
@@ -158,8 +156,7 @@
    "fieldname": "ppe_status",
    "fieldtype": "Select",
    "label": "PPE Status",
-   "options": "\nPPE required - not worn at all\nPPE required - not worn fully / properly\nPPE required - worn completely and properly\nNo PPE required",
-   "reqd": 1
+   "options": "\nPPE required - not worn at all\nPPE required - not worn fully / properly\nPPE required - worn completely and properly\nNo PPE required"
   },
   {
    "depends_on": "eval: doc.location == 'Other'",
@@ -180,22 +177,19 @@
    "fieldname": "role_type",
    "fieldtype": "Select",
    "label": "Victim Role Type",
-   "options": "\nEmployee (FTE)\nCasual\nContractor\nSupplier\nVisitor",
-   "reqd": 1
+   "options": "\nEmployee (FTE)\nCasual\nContractor\nSupplier\nVisitor"
   },
   {
    "fieldname": "victim_presence_status",
    "fieldtype": "Select",
    "label": "Victim Presence Status",
-   "options": "\nAt Work\nIn Transit home-work\nVisiting",
-   "reqd": 1
+   "options": "\nAt Work\nIn Transit home-work\nVisiting"
   },
   {
    "depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "fieldname": "victim_employee",
    "fieldtype": "Link",
    "label": "Victim Name (Employee)",
-   "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "options": "Employee"
   },
   {
@@ -204,7 +198,6 @@
    "fieldname": "victim_employee_department",
    "fieldtype": "Link",
    "label": "Victim Employee Department ",
-   "mandatory_depends_on": "eval: doc.role_type == 'Employee (FTE)'",
    "options": "Department"
   },
   {
