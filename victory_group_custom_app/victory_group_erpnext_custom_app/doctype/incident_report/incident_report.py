@@ -281,13 +281,13 @@ def enforce_pending_signoff(doc, method=None):
     """Enforce root_cause word count when workflow_state transitions to 'Pending sign off'."""
     try:
         prev = doc.get_doc_before_save()
-        # frappe.log_error(f"Previous workflow state: {prev.workflow_state if prev else 'N/A'}; Current: {doc.workflow_state}")
         prev_state = prev.workflow_state if prev else None
-        if (
-            prev_state != "Pending sign off"
-            and doc.workflow_state == "Pending sign off"
-        ):
+        # Send notification when transitioning to 'Pending Acknowledgement'
+        if prev_state != "Pending Acknowledgement" and doc.workflow_state == "Pending Acknowledgement":
+            notify_on_create(doc)
 
+        # Existing logic for 'Pending sign off'
+        if prev_state != "Pending sign off" and doc.workflow_state == "Pending sign off":
             def _count_words(text):
                 if not text:
                     return 0
@@ -312,7 +312,4 @@ def enforce_pending_signoff(doc, method=None):
             if not attachments:
                 frappe.throw(_("Please Attach Reference Document(s)."))
     except Exception:
-        # frappe.log_error(
-        #     frappe.get_traceback(), "Error enforcing Pending sign off requirements"
-        # )
         raise
