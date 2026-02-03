@@ -208,8 +208,13 @@ def notify_on_submit(doc, method=None):
         )
 
 def notify_on_create(doc, method=None):
-
     try:
+        prev_doc = doc.get_doc_before_save()
+        # If no previous doc, it's a brand new record (still in Draft)
+        prev_state = prev_doc.workflow_state if prev_doc else "Draft"
+        
+        # LOGIC: Only trigger if moving FROM Draft TO Pending Acknowledgement
+        if prev_state == "Draft" and doc.workflow_state == "Pending Acknowledgement":
             recipients = recipients_for_incident(doc)
             if not recipients:
                 frappe.log_error(
