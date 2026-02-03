@@ -65,11 +65,13 @@ frappe.ui.form.on("Incident Report", {
 		}
 	},
 	incident_type: function(frm) {
-		toggle_victim_fields(frm);
-		const sev = SEVERITY_MAP[frm.doc.incident_type];
-		if (sev) {
-			frm.set_value('severity', sev);
-		}
+        // Clear victim fields on incident type update
+        VICTIM_FIELDS.forEach(f => frm.set_value(f, null));
+        toggle_victim_fields(frm);
+        const sev = SEVERITY_MAP[frm.doc.incident_type];
+        if (sev) {
+            frm.set_value('severity', sev);
+        }
 	},
 	incident_type_subcategory: toggle_victim_fields,
 	role_type: toggle_victim_fields
