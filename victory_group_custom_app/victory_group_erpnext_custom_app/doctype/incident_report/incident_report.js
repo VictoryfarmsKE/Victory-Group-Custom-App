@@ -64,18 +64,16 @@ frappe.ui.form.on("Incident Report", {
 			frm.set_value('severity', sev);
 		}
 	},
-	incident_type: function(frm) {
-		toggle_victim_fields(frm);
-        
-        if (frm.doc.incident_type === 'Others') {
-            frm.set_value('role_type', '');
-            VICTIM_FIELDS.forEach(f => frm.set_value(f, ''));
-        }
-
+	incident_type: function(frm) { 
+		frm.set_value('role_type', '');
+		VICTIM_FIELDS.forEach(f => {
+            if(f !== 'role_type') frm.set_value(f, ''); 
+        });
 		const sev = SEVERITY_MAP[frm.doc.incident_type];
 		if (sev) {
 			frm.set_value('severity', sev);
 		}
+		toggle_victim_fields(frm);
 	},
 	incident_type_subcategory: toggle_victim_fields,
 	role_type: toggle_victim_fields
