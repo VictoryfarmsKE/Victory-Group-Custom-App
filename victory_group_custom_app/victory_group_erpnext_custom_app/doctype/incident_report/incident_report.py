@@ -66,13 +66,14 @@ def _linemanager_user_email(employee_name):
 def _hod_user_email(department_name):
     if not department_name:
         return None
+    hod = None
     hod_employee = frappe.get_value("Department", department_name, "custom_hod")
     if hod_employee:
-            hod = frappe.get_value("Employee", hod_employee, "user_id")
-            if hod:
-                status = frappe.get_value("User", hod_employee, "enabled")
-                if status == "1":
-                    return frappe.get_value("User", hod_employee, "email")
+        hod = frappe.get_value("Employee", hod_employee, "user_id")
+        if hod:
+            status = frappe.get_value("User", hod_employee, "enabled")
+            if status == "1":
+                return frappe.get_value("User", hod_employee, "email")
     return hod
 
 def recipients_for_incident(doc):
