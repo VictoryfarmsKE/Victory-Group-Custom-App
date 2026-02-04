@@ -120,7 +120,7 @@
   {
    "fieldname": "root_cause",
    "fieldtype": "Long Text",
-   "label": "Root Cause",
+   "label": "Root Cause (minimum 25 words)",
    "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'"
   },
   {
