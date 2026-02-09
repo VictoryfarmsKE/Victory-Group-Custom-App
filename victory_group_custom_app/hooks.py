@@ -5,6 +5,16 @@ app_description = "Custom App for ERPNext Customizations for Victory Group"
 app_email = "christinek@victoryfarmskenya.com"
 app_license = "mit"
 
+
+fixtures = [
+    "Client Script",
+    "Server Script",
+    "Custom Field",
+    {"dt": "Client Script", "filters": [["module", "like", "Victory Group ERPNext Custom App"]]},
+    {"dt": "Server Script", "filters": [["module", "like", "Victory Group ERPNext Custom App"]]},
+    {"dt": "Custom Field", "filters": [["module", "like", "Victory Group ERPNext Custom App"]]},
+]
+
 # Apps
 # ------------------
 
