@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:VF-{incident_type}-{#####}",
+ "autoname": "VF-{incident_type}-{#####}",
  "creation": "2025-12-01 08:50:38.664540",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -34,7 +34,15 @@
   "immediate_causes",
   "amended_from",
   "tab_break_tkym",
+  "section_break_nvnd",
   "root_cause",
+  "section_break_qola",
+  "breach_of_policy",
+  "column_break_jmje",
+  "breach_of_sop",
+  "column_break_kgjk",
+  "displinary_action",
+  "section_break_mzcd",
   "corrective_actions",
   "instructions"
  ],
@@ -240,19 +248,61 @@
    "reqd": 1
   },
   {
+   "bold": 1,
    "default": "Please ensure to attach mandatory additional information before submitting the final report",
    "fieldname": "instructions",
    "fieldtype": "Small Text",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "section_break_qola",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "breach_of_policy",
+   "fieldtype": "Select",
+   "label": "Breach of Policy",
+   "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_jmje",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "breach_of_sop",
+   "fieldtype": "Select",
+   "label": "Breach of SOP",
+   "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_kgjk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "displinary_action",
+   "fieldtype": "Select",
+   "label": "Displinary Action",
+   "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "section_break_nvnd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_mzcd",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 16:04:30.462379",
+ "modified": "2026-02-13 11:41:41.677936",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Incident Report",
