@@ -263,7 +263,7 @@
   {
    "fieldname": "breach_of_policy",
    "fieldtype": "Select",
-   "label": "Breach of Policy",
+   "label": "Was there a breach of company policies",
    "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
    "options": "\nYes\nNo"
   },
@@ -274,7 +274,7 @@
   {
    "fieldname": "breach_of_sop",
    "fieldtype": "Select",
-   "label": "Breach of SOP",
+   "label": "Was there a breach of any SOPs?",
    "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
    "options": "\nYes\nNo"
   },
@@ -285,7 +285,7 @@
   {
    "fieldname": "displinary_action",
    "fieldtype": "Select",
-   "label": "Displinary Action",
+   "label": "Does this case need to be considered for disciplinary action by HR?",
    "mandatory_depends_on": "eval: doc.workflow_state == 'Pending Full Submission'",
    "options": "\nYes\nNo"
   },
