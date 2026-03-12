@@ -65,6 +65,7 @@
   "accounting_details_section",
   "expense_account",
   "payable_account",
+  "deposits_account",
   "column_break_axhh",
   "auto_create_purchase_orders",
   "lease_status",
@@ -470,13 +471,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "deposits_account",
+   "fieldtype": "Link",
+   "label": "Deposits Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 13:52:20.719472",
+ "modified": "2026-03-12 14:46:13.309307",
  "modified_by": "Administrator",
  "module": "Victory Group ERPNext Custom App",
  "name": "Lease Contract",
