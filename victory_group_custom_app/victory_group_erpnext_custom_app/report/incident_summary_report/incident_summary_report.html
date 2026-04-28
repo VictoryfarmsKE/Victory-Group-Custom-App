@@ -1,0 +1,407 @@
+{%
+	var report_columns = report.get_columns_for_print();
+	var severities = ["Low", "Moderate", "High", "Catastrophic"];
+	var incident_types = ["Near Miss (NM)", "First Aid Case (FAC)", "Lost Time Injury (LTI)", "Fatality", "Others"];
+	var status_counts = {"Open": 0, "Pending": 0, "Closed": 0};
+	var severity_counts = {"Low": 0, "Moderate": 0, "High": 0, "Catastrophic": 0};
+	var incident_type_counts = {};
+	var incident_type_status_counts = {};
+	var max_severity_count = 0;
+	var max_incident_type_total = 0;
+
+	for (var i = 0, l = incident_types.length; i < l; i++) {
+		incident_type_counts[incident_types[i]] = 0;
+		incident_type_status_counts[incident_types[i]] = {"Open": 0, "Pending": 0, "Closed": 0};
+	}
+
+	for (var j = 0, k = data.length; j < k; j++) {
+		var row = data[j] || {};
+		if (status_counts[row.report_status] !== undefined) {
+			status_counts[row.report_status] += 1;
+		}
+		if (severity_counts[row.severity] !== undefined) {
+			severity_counts[row.severity] += 1;
+		}
+		if (incident_type_counts[row.incident_type] !== undefined) {
+			incident_type_counts[row.incident_type] += 1;
+			if (
+				incident_type_status_counts[row.incident_type]
+				&& incident_type_status_counts[row.incident_type][row.report_status] !== undefined
+			) {
+				incident_type_status_counts[row.incident_type][row.report_status] += 1;
+			}
+		}
+	}
+
+	for (var s = 0, sl = severities.length; s < sl; s++) {
+		if (severity_counts[severities[s]] > max_severity_count) {
+			max_severity_count = severity_counts[severities[s]];
+		}
+	}
+
+	for (var t = 0, tl = incident_types.length; t < tl; t++) {
+		if (incident_type_counts[incident_types[t]] > max_incident_type_total) {
+			max_incident_type_total = incident_type_counts[incident_types[t]];
+		}
+	}
+
+	var total_incidents = data.length;
+%}
+
+<style>
+	@page {
+		size: landscape;
+		margin: 0.35in;
+	}
+	body {
+		margin: 0;
+		padding: 0;
+		color: #1f2937;
+		font-family: Arial, sans-serif;
+		font-size: 9px;
+	}
+	.incident-report-container {
+		width: 100%;
+	}
+	.header-block {
+		margin-bottom: 10px;
+	}
+	.header-title {
+		font-size: 18px;
+		font-weight: 700;
+		margin: 0;
+	}
+	.header-subtitle {
+		font-size: 10px;
+		color: #4b5563;
+		margin-top: 4px;
+	}
+	.info-table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 10px 0 12px;
+	}
+	.info-table td {
+		border: 1px solid #d1d5db;
+		padding: 6px 8px;
+		font-size: 9px;
+	}
+	.info-table .label {
+		font-weight: 700;
+		color: #111827;
+	}
+	.summary-grid {
+		width: 100%;
+		margin-bottom: 12px;
+	}
+	.summary-card {
+		display: inline-block;
+		width: 24%;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		padding: 8px 10px;
+		margin-right: 0.8%;
+		box-sizing: border-box;
+		vertical-align: top;
+		background: #f9fafb;
+	}
+	.summary-card:last-child {
+		margin-right: 0;
+	}
+	.summary-label {
+		font-size: 8px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #6b7280;
+	}
+	.summary-value {
+		font-size: 18px;
+		font-weight: 700;
+		margin-top: 4px;
+	}
+	.section-title {
+		font-size: 11px;
+		font-weight: 700;
+		margin: 14px 0 8px;
+		padding-bottom: 4px;
+		border-bottom: 1px solid #d1d5db;
+	}
+	.chart-row {
+		width: 100%;
+		margin-bottom: 12px;
+	}
+	.chart-panel {
+		display: inline-block;
+		width: 49.2%;
+		vertical-align: top;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		padding: 10px;
+		box-sizing: border-box;
+		min-height: 220px;
+	}
+	.chart-panel + .chart-panel {
+		margin-left: 1.2%;
+	}
+	.chart-title {
+		font-size: 10px;
+		font-weight: 700;
+		margin-bottom: 10px;
+	}
+	.chart-legend {
+		margin-bottom: 10px;
+		font-size: 8px;
+		color: #4b5563;
+	}
+	.legend-item {
+		display: inline-block;
+		margin-right: 12px;
+	}
+	.legend-swatch {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		margin-right: 4px;
+		border-radius: 2px;
+		vertical-align: middle;
+	}
+	.chart-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	.chart-table td {
+		padding: 4px 0;
+		vertical-align: middle;
+	}
+	.chart-label {
+		width: 28%;
+		font-weight: 600;
+		font-size: 8px;
+		padding-right: 8px;
+	}
+	.chart-bar-cell {
+		width: 60%;
+		padding-right: 8px;
+	}
+	.chart-value {
+		width: 12%;
+		text-align: right;
+		font-weight: 700;
+	}
+	.bar-track {
+		width: 100%;
+		height: 16px;
+		background: #eef2f7;
+		border-radius: 999px;
+		overflow: hidden;
+	}
+	.bar-fill {
+		height: 100%;
+		border-radius: 999px;
+	}
+	.bar-width-table {
+		width: 100%;
+		height: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
+	.bar-width-table td {
+		padding: 0;
+		height: 16px;
+	}
+	.stack-bar-track {
+		width: 100%;
+		height: 18px;
+		background: #eef2f7;
+		border-radius: 999px;
+		overflow: hidden;
+		font-size: 0;
+	}
+	.stack-segment {
+		display: inline-block;
+		height: 100%;
+	}
+	.stack-bar-table {
+		width: 100%;
+		height: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
+	.stack-bar-table td {
+		padding: 0;
+		height: 18px;
+	}
+	.bar-open { background: #e74c3c; }
+	.bar-pending { background: #00BDF0; }
+	.bar-closed { background: #10812E; }
+	.bar-severity { background: #00BDF0; }
+	.incident-table {
+		width: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
+	.incident-table th,
+	.incident-table td {
+		border: 1px solid #d1d5db;
+		padding: 5px 6px;
+		font-size: 8px;
+		text-align: left;
+		word-break: break-word;
+	}
+	.incident-table th {
+		background: #f3f4f6;
+		font-weight: 700;
+	}
+	.incident-table td.text-center,
+	.incident-table th.text-center {
+		text-align: center;
+	}
+	.footer-note {
+		margin-top: 10px;
+		font-size: 8px;
+		color: #6b7280;
+		text-align: right;
+	}
+</style>
+
+<div class="incident-report-container">
+	<div class="header-block">
+		<h2 class="header-title">{%= __(report.report_name) %}</h2>
+		<div class="header-subtitle">
+			{%= __("Incident summary and detailed incident listing") %}
+		</div>
+	</div>
+
+	<table class="info-table">
+		<tr>
+			<td>
+				<span class="label">{%= __("From Date") %}:</span>
+				{%= filters.from_date ? frappe.datetime.str_to_user(filters.from_date) : __("All") %}
+			</td>
+			<td>
+				<span class="label">{%= __("To Date") %}:</span>
+				{%= filters.to_date ? frappe.datetime.str_to_user(filters.to_date) : __("All") %}
+			</td>
+			<td>
+				<span class="label">{%= __("Location") %}:</span>
+				{%= filters.location || __("All") %}
+			</td>
+		</tr>
+	</table>
+
+	<div class="summary-grid">
+		<div class="summary-card">
+			<div class="summary-label">{%= __("Open") %}</div>
+			<div class="summary-value">{%= status_counts.Open %}</div>
+		</div>
+		<div class="summary-card">
+			<div class="summary-label">{%= __("Pending") %}</div>
+			<div class="summary-value">{%= status_counts.Pending %}</div>
+		</div>
+		<div class="summary-card">
+			<div class="summary-label">{%= __("Closed") %}</div>
+			<div class="summary-value">{%= status_counts.Closed %}</div>
+		</div>
+		<div class="summary-card">
+			<div class="summary-label">{%= __("Total Incidents") %}</div>
+			<div class="summary-value">{%= total_incidents %}</div>
+		</div>
+	</div>
+
+	<div class="section-title">{%= __("Charts") %}</div>
+	<div class="chart-row">
+		<div class="chart-panel">
+			<div class="chart-title">{%= __("Incidents by Type") %}</div>
+			<div class="chart-legend">
+				<span class="legend-item"><span class="legend-swatch bar-open"></span>{%= __("Open") %}</span>
+				<span class="legend-item"><span class="legend-swatch bar-pending"></span>{%= __("Pending") %}</span>
+				<span class="legend-item"><span class="legend-swatch bar-closed"></span>{%= __("Closed") %}</span>
+			</div>
+			<table class="chart-table">
+				{% for (var type_index = 0, type_len = incident_types.length; type_index < type_len; type_index++) { %}
+					{% var incident_type = incident_types[type_index]; %}
+					{% var type_total = incident_type_counts[incident_type] || 0; %}
+					{% var open_count = incident_type_status_counts[incident_type].Open || 0; %}
+					{% var pending_count = incident_type_status_counts[incident_type].Pending || 0; %}
+					{% var closed_count = incident_type_status_counts[incident_type].Closed || 0; %}
+					{% var open_width = max_incident_type_total ? (open_count / max_incident_type_total) * 100 : 0; %}
+					{% var pending_width = max_incident_type_total ? (pending_count / max_incident_type_total) * 100 : 0; %}
+					{% var closed_width = max_incident_type_total ? (closed_count / max_incident_type_total) * 100 : 0; %}
+					<tr>
+						<td class="chart-label">{%= incident_type %}</td>
+						<td class="chart-bar-cell">
+							<div class="stack-bar-track">
+								<table class="stack-bar-table">
+									<tr>
+										<td class="bar-open" width="{%= open_width %}%"></td>
+										<td class="bar-pending" width="{%= pending_width %}%"></td>
+										<td class="bar-closed" width="{%= closed_width %}%"></td>
+									</tr>
+								</table>
+							</div>
+						</td>
+						<td class="chart-value">{%= type_total %}</td>
+					</tr>
+				{% } %}
+			</table>
+		</div>
+
+		<div class="chart-panel">
+			<div class="chart-title">{%= __("Incidents by Severity") %}</div>
+			<table class="chart-table">
+				{% for (var sev_index = 0, sev_len = severities.length; sev_index < sev_len; sev_index++) { %}
+					{% var severity = severities[sev_index]; %}
+					{% var severity_total = severity_counts[severity] || 0; %}
+					{% var severity_width = max_severity_count ? (severity_total / max_severity_count) * 100 : 0; %}
+					<tr>
+						<td class="chart-label">{%= severity %}</td>
+						<td class="chart-bar-cell">
+							<div class="bar-track">
+								<table class="bar-width-table">
+									<tr>
+										<td class="bar-fill bar-severity" width="{%= severity_width %}%"></td>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</td>
+						<td class="chart-value">{%= severity_total %}</td>
+					</tr>
+				{% } %}
+			</table>
+		</div>
+	</div>
+
+	<div class="section-title">{%= __("Incident Details") %}</div>
+	<table class="incident-table">
+		<thead>
+			<tr>
+				{% for (var col_index = 0, col_len = report_columns.length; col_index < col_len; col_index++) { %}
+					<th>{%= report_columns[col_index].label %}</th>
+				{% } %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for (var row_index = 0, row_len = data.length; row_index < row_len; row_index++) { %}
+				{% var detail_row = data[row_index]; %}
+				<tr>
+					{% for (var field_index = 0, field_len = report_columns.length; field_index < field_len; field_index++) { %}
+						{% var column = report_columns[field_index]; %}
+						{% var fieldname = column.fieldname; %}
+						<td>
+							{% if (column.fieldtype === "Datetime" && detail_row[fieldname]) { %}
+								{%= frappe.datetime.str_to_user(detail_row[fieldname]) %}
+							{% } else if (!is_null(detail_row[fieldname])) { %}
+								{%= detail_row[fieldname] %}
+							{% } %}
+						</td>
+					{% } %}
+				</tr>
+			{% } %}
+		</tbody>
+	</table>
+
+	<div class="footer-note">
+		{%= __("Printed On {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}
+	</div>
+</div>
